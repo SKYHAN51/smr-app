@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patiënt Intake — SMR Zorgpad</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f4f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1B5E20 0%, #388E3C 100%);
+      padding: 36px 32px 32px;
+      text-align: center;
+    }
+    .header-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+    .header h1 { color: #fff; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .header p { color: #A5D6A7; font-size: 13px; letter-spacing: 0.3px; }
+
+    /* Form */
+    .form-body { padding: 32px; }
+
+    .form-row { margin-bottom: 20px; }
+    .form-row label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .form-row input,
+    .form-row select {
+      width: 100%;
+      padding: 13px 15px;
+      border: 2px solid #e8e8e8;
+      border-radius: 11px;
+      font-size: 15px;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fafafa;
+      font-family: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-row select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    .form-row input:focus,
+    .form-row select:focus {
+      border-color: #43A047;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(67,160,71,0.10);
+    }
+    .form-row input::placeholder { color: #ccc; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 8px 0 24px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #bbb;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 18px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 17px;
+      background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+      color: #fff;
+      border: none;
+      border-radius: 13px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 4px 14px rgba(46,125,50,0.30);
+      margin-top: 8px;
+    }
+    .submit-btn:hover:not(:disabled) {
+      opacity: 0.93;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(46,125,50,0.35);
+    }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      padding: 13px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    /* Loading state */
+    .loading-state {
+      padding: 60px 32px;
+      text-align: center;
+      display: none;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid #e8f5e9;
+      border-top-color: #2E7D32;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state p { color: #666; font-size: 15px; line-height: 1.7; }
+    .loading-state p strong { color: #2E7D32; }
+
+    /* Success state */
+    .success-state {
+      padding: 52px 32px;
+      text-align: center;
+      display: none;
+    }
+    .success-icon { font-size: 60px; margin-bottom: 16px; display: block; }
+    .success-state h2 { font-size: 22px; color: #1B5E20; font-weight: 800; margin-bottom: 10px; }
+    .patient-name-badge {
+      display: inline-block;
+      font-size: 19px;
+      font-weight: 800;
+      color: #2E7D32;
+      background: #F1F8E9;
+      border: 2px solid #A5D6A7;
+      padding: 10px 24px;
+      border-radius: 40px;
+      margin: 14px 0 20px;
+    }
+    .success-list {
+      list-style: none;
+      text-align: left;
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+    }
+    .success-list li {
+      font-size: 14px;
+      color: #555;
+      padding: 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .success-list li span { font-size: 16px; }
+
+    .new-btn {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #2E7D32;
+      border: 2px solid #A5D6A7;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .new-btn:hover { background: #F1F8E9; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: #ccc;
+      border-top: 1px solid #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="header">
+    <span class="header-icon">🚭</span>
+    <h1>Patiënt Intake</h1>
+    <p>Stoppen-met-roken Zorgpad &middot; Nieuwe aanmelding</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-body" id="form-state">
+
+    <div class="section-label">Patiëntgegevens</div>
+
+    <div class="form-row">
+      <label>Naam patiënt</label>
+      <input type="text" id="naam" placeholder="Voor- en achternaam">
+    </div>
+
+    <div class="form-row">
+      <label>E-mailadres patiënt</label>
+      <input type="email" id="email" placeholder="patient@voorbeeld.nl">
+    </div>
+
+    <div class="form-row">
+      <label>Apotheek</label>
+      <select id="apotheek">
+        <option value="Apotheek Gilze">Apotheek Gilze</option>
+        <option value="Apotheek Tilburg">Apotheek Tilburg</option>
+        <option value="Apotheek Breda">Apotheek Breda</option>
+        <option value="BENU Apotheek Utrecht">BENU Apotheek Utrecht</option>
+        <option value="Service Apotheek Haarlem">Service Apotheek Haarlem</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Behandeling</div>
+
+    <div class="form-row">
+      <label>Medicatie</label>
+      <select id="medicatie">
+        <option value="Varenicline">Varenicline (Champix)</option>
+        <option value="NRT Patch">NRT Pleister</option>
+        <option value="NRT Kauwgom">NRT Kauwgom</option>
+        <option value="NRT Spray">NRT Neusspray</option>
+        <option value="Bupropion">Bupropion (Zyban)</option>
+        <option value="Combinatie NRT">Combinatie NRT</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Startdatum behandeling</label>
+      <input type="date" id="start_datum">
+    </div>
+
+    <div class="two-col">
+      <div class="form-row">
+        <label>Sigaretten per dag</label>
+        <input type="number" id="sigaretten" value="20" min="1" max="100">
+      </div>
+      <div class="form-row">
+        <label>Jaren gerookt</label>
+        <input type="number" id="jaren" value="10" min="1" max="60">
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitIntake()">
+      Patiënt aanmelden &rarr;
+    </button>
+
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" id="loading-state">
+    <div class="spinner"></div>
+    <p>
+      <strong>Patiënt wordt aangemeld...</strong><br><br>
+      Profiel aanmaken in Supabase &middot;<br>
+      5 follow-up momenten inplannen &middot;<br>
+      Welkomstemail opstellen &amp; versturen
+    </p>
+  </div>
+
+  <!-- Success -->
+  <div class="success-state" id="success-state">
+    <span class="success-icon">✅</span>
+    <h2>Patiënt aangemeld!</h2>
+    <div class="patient-name-badge" id="success-naam"></div>
+    <ul class="success-list">
+      <li><span>📋</span> Patiëntprofiel aangemaakt in Supabase</li>
+      <li><span>📅</span> 5 follow-up momenten ingepland (dag 7, 14, 30, 60, 90)</li>
+      <li><span>📧</span> Persoonlijke welkomstemail verstuurd</li>
+      <li><span>📊</span> Zichtbaar in het apotheker dashboard</li>
+    </ul>
+    <button class="new-btn" onclick="resetForm()">+ Nieuwe patiënt aanmelden</button>
+  </div>
+
+  <div class="footer">SMR Zorgpad &middot; Apotheek Automatisering</div>
+</div>
+
+<script>
+  document.getElementById('start_datum').value = new Date().toISOString().split('T')[0];
+
+  async function submitIntake() {
+    const naam = document.getElementById('naam').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const apotheek = document.getElementById('apotheek').value;
+    const start_datum = document.getElementById('start_datum').value;
+    const medicatie = document.getElementById('medicatie').value;
+    const sigaretten_per_dag = parseInt(document.getElementById('sigaretten').value) || 20;
+    const jaren_gerookt = parseInt(document.getElementById('jaren').value) || 10;
+
+    if (!naam) { showError('Vul de naam van de patiënt in.'); return; }
+    if (!email) { showError('Vul het e-mailadres in.'); return; }
+
+    hideError();
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('loading-state').style.display = 'block';
+
+    try {
+      const res = await fetch('https://n8n.skyhan.app/webhook/smr-intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ naam, email, apotheek, start_datum, sigaretten_per_dag, jaren_gerookt, medicatie })
+      });
+
+      if (!res.ok) throw new Error(res.status);
+
+      document.getElementById('success-naam').textContent = naam;
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('success-state').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('form-state').style.display = 'block';
+      showError('Er ging iets mis. Controleer de verbinding en probeer opnieuw.');
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('naam').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('start_datum').value = new Date().toISOString().split('T')[0];
+    document.getElementById('sigaretten').value = 20;
+    document.getElementById('jaren').value = 10;
+    document.getElementById('success-state').style.display = 'none';
+    document.getElementById('form-state').style.display = 'block';
+    hideError();
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error-msg').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
