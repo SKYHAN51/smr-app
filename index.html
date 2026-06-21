@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22c55e" />
+  <title>Rookvrij Programma</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======== LOADING SCREEN ======== -->
+  <div id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- ======== ERROR SCREEN ======== -->
+  <div id="error" class="screen hidden">
+    <span class="error-icon">🔗</span>
+    <h2>Ongeldige link</h2>
+    <p>Deze link is niet geldig of verlopen. Neem contact op met uw apotheek voor een nieuwe link.</p>
+  </div>
+
+  <!-- ======== APP SCREEN ======== -->
+  <div id="app" class="screen hidden">
+
+    <!-- Header: days smoke-free -->
+    <header>
+      <p class="greeting">Hallo <span id="naam">daar</span>,</p>
+      <span class="big-number" id="days">0</span>
+      <p class="days-label">dagen rookvrij 🎉</p>
+    </header>
+
+    <!-- Stats: cigarettes avoided + money saved -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-icon">🚬</span>
+        <span class="stat-number" id="cigarettes">0</span>
+        <span class="stat-label">sigaretten niet gerookt</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">💰</span>
+        <span class="stat-number" id="money">€0,00</span>
+        <span class="stat-label">bespaard</span>
+      </div>
+    </div>
+
+    <!-- Next contact -->
+    <div class="next-contact" id="next-contact">
+      📅 Volgende contact laden...
+    </div>
+
+    <!-- Mood card -->
+    <div class="mood-card">
+      <h2>Hoe gaat het vandaag?</h2>
+      <div class="mood-buttons">
+        <button class="mood-btn" data-mood="goed" type="button">
+          😊
+          <span class="mood-label">Goed</span>
+        </button>
+        <button class="mood-btn" data-mood="neutraal" type="button">
+          😐
+          <span class="mood-label">Neutraal</span>
+        </button>
+        <button class="mood-btn" data-mood="moeilijk" type="button">
+          😔
+          <span class="mood-label">Moeilijk</span>
+        </button>
+      </div>
+      <textarea
+        id="message"
+        rows="3"
+        placeholder="Optioneel: vertel hoe het gaat, wat u bezig houdt..."
+      ></textarea>
+      <button id="submit-btn" class="submit-btn hidden" type="button">
+        Verstuur mijn melding
+      </button>
+      <p id="submit-error" class="submit-error hidden">Er ging iets mis. Probeer het opnieuw.</p>
+    </div>
+
+    <!-- Success card (hidden until submit) -->
+    <div id="success-card" class="success-card hidden">
+      <span class="success-icon">✅</span>
+      <h3>Bedankt voor uw melding!</h3>
+      <p>Uw apotheek is op de hoogte gesteld. Ze nemen contact met u op als dat nodig is. Ga zo door — u doet het geweldig!</p>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">
+      Rookvrij Programma &middot; Uw apotheek<br />
+      Vragen? Bel of mail uw apotheker.
+    </p>
+
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
