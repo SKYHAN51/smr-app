@@ -118,8 +118,11 @@
     var message = messageEl ? messageEl.value.trim() : '';
 
     submitBtn.disabled = true;
-    var originalText = submitBtn.textContent;
+    var originalText = submitBtn.textContent.trim();
     submitBtn.textContent = 'Versturen...';
+
+    var errMsg = document.getElementById('submit-error');
+    if (errMsg) errMsg.classList.add('hidden');
 
     // POST mood event to Supabase
     var eventBody = JSON.stringify({
@@ -144,7 +147,7 @@
         throw new Error('Supabase error: ' + eventResponse.status);
       }
 
-      // Non-blocking: fire Make.com webhook, don't await or let it block UI
+      // Non-blocking: fire n8n mood webhook for risk score update
       fetch(CONFIG.moodWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,9 +165,9 @@
       if (successCard) successCard.classList.remove('hidden');
 
     } catch (err) {
-      const errMsg = document.getElementById('submit-error');
-      if (errMsg) errMsg.classList.remove('hidden');
-      submitBtn.textContent = 'Verstuur →';
+      const errMsgEl = document.getElementById('submit-error');
+      if (errMsgEl) errMsgEl.classList.remove('hidden');
+      submitBtn.textContent = originalText;
       submitBtn.disabled = false;
     }
   });

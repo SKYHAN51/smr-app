@@ -331,23 +331,41 @@
     document.getElementById('form-state').style.display = 'none';
     document.getElementById('loading-state').style.display = 'block';
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     try {
       const res = await fetch('https://n8n.skyhan.app/webhook/smr-intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ naam, email, apotheek, start_datum, sigaretten_per_dag, jaren_gerookt, medicatie })
+        body: JSON.stringify({ naam, email, apotheek, start_datum, sigaretten_per_dag, jaren_gerookt, medicatie }),
+        signal: controller.signal
       });
+      clearTimeout(timeout);
 
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        if (body.includes('duplicate') || body.includes('unique')) {
+          throw new Error('duplicate');
+        }
+        throw new Error('server');
+      }
 
       document.getElementById('success-naam').textContent = naam;
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('success-state').style.display = 'block';
 
     } catch (err) {
+      clearTimeout(timeout);
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('form-state').style.display = 'block';
-      showError('Er ging iets mis. Controleer de verbinding en probeer opnieuw.');
+      if (err.name === 'AbortError') {
+        showError('Verzoek duurde te lang. Controleer de verbinding en probeer opnieuw.');
+      } else if (err.message === 'duplicate') {
+        showError('Dit e-mailadres staat al in het systeem. Gebruik een ander e-mailadres.');
+      } else {
+        showError('Er ging iets mis. Probeer het opnieuw.');
+      }
     }
   }
 
